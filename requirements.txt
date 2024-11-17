@@ -1,1 +1,14 @@
-
+streamlit
+langchain
+transformers
+chromadb
+huggingface_hub
+langchain_community
+langchain_ollama
+torch
+numpy
+pandas
+unstructured
+sentence-transformers
+pypdf
+python-docx
