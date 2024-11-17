@@ -1,8 +1,6 @@
 
 import streamlit as st
-# from chromadb.config import Settings
 from langchain.embeddings import HuggingFaceEmbeddings
-
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
@@ -17,18 +15,16 @@ from langchain.chains import LLMChain
 import chromadb
 import base64
 import re
-
-
 import os
 
-# Function to save the uploaded file and return the file path
+# Process the uploaded file.
 def save_uploaded_file(uploaded_file):
     # Define a folder to save the file temporarily
     temp_dir = "uploaded_files"
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    # Create the path where the file will be saved
+    # Provide the directory path to save the file.
     file_path = os.path.join(temp_dir, uploaded_file.name)
 
     # Save the file to the directory
@@ -49,13 +45,13 @@ def load_txt(txt_path):
     documents = loader.load()
     return documents
 
-# Function to load Word file
+# Function to load Word docx file
 def load_word(word_path):
     loader = UnstructuredWordDocumentLoader(word_path)
     documents = loader.load()
     return documents
 
-# Function to load data based on the file type
+# Load data based on the file extension.
 def load_data(file_path):
     ext = file_path.split('.')[-1].lower()
     if ext == 'pdf':
@@ -67,44 +63,27 @@ def load_data(file_path):
     else:
         raise ValueError("Unsupported file type")
 
-# Sentiment Analysis setup
-sentiment_analyzer = pipeline('sentiment-analysis')
+# Perform Sentiment Analysis
 
-# Function to analyze sentiment
+# Create a pipeline to analyze the sentiment of user input.
+sentiment_analyzer = pipeline('sentiment-analysis')
 def analyze_sentiment(question):
     sentiment = sentiment_analyzer(question)[0]
     return sentiment['label']  # e.g., 'POSITIVE', 'NEGATIVE', 'NEUTRAL'
 
 
-
-
-
-
-
 # Streamlit UI
 
-
-# # Optional: Display the image to ensure it's working
-# st.image(image_url)
-
-# Function to load image and return it as base64
+# Convert image to base64 and create URL to use as background
 def image_to_base64(image_path):
     with open(image_path, "rb") as img_file:
         img_b64 = base64.b64encode(img_file.read()).decode()
     return img_b64
 
-# Path to your local image file
 image_path = "/Users/kundhana_hp/Downloads/hackathon/chitti_the_robo.jpg"
-
-# Convert the image to base64 and create a data URL
 img_b64 = image_to_base64(image_path)
 image_url = f"data:image/jpg;base64,{img_b64}"
-
-# Optional: Check the first 1000 characters of the base64 string for debugging
-st.text(img_b64[:1000])  # Just for debugging, remove this in production
-
-# Set the background image using the base64 data URL
-
+# Some CSS for styling
 st.markdown(
     f"""
     <style>
@@ -113,74 +92,63 @@ st.markdown(
         background-size: 70%;
         background-position: right center;
         background-repeat: no-repeat;
-        height: 100vh;  /* Ensure the background covers the entire viewport height */
-        margin: 0;  /* Remove any default margin */
-        overflow: hidden;  /* Hide scrollbars if needed */
+        height: 100vh;  
+        margin: 0;  
+        overflow: hidden; 
         padding-left: 30px;
         padding-right: 10px;
     }}
     .reportview-container {{
-        background: transparent;  /* Ensure the content area is transparent so background is visible */
-        height: 100vh;  /* Full height of viewport */
+        background: transparent;  
+        height: 100vh;  
     }}
-    # .css-18e3th9, .css-1v0mbdj {{  /* Hide the default streamlit text */
-    #     display: ;
-    # }}
     .css-1v0mbdj, .css-1v0mbdj > div {{
         display: flex;
         flex-direction: column;
-        justify-content: center;  /* Vertically center */
-        align-items: flex-start;  /* Left-align */
+        justify-content: center;  
+        align-items: flex-start;  
         height: 100vh;
-        padding-left: 30px;  /* Add left padding to align content left */
+        padding-left: 30px;  
     }}
     .stApp {{
-        background: transparent;  /* Make sure the content area also has a transparent background */
+        background: transparent;  
     }}
     .stTitle {{
-        text-align: left;  /* Align the title to the left */
-        padding-left: 20px;  /* Add some padding to the left */
+        text-align: left;  
+        padding-left: 20px;  
     }}
     .stFileUploader, .stButton, .stTextInput, .stSelectbox {{
         display: flex;
-        justify-content: flex-start;  /* Align these widgets to the left */
-        margin-left: 20px;  /* Add some margin to the left */
-    }}
+        justify-content: flex-start;  
+        margin-left: 20px;  
     </style>
     """,
     unsafe_allow_html=True
 )
-
-# Optional: Display the image directly for testing
-# st.image(image_url)
-
-
-
 st.title('AskMyDoc: Upload, Summarize, and Ask Anything')
 
 # Upload document
 uploaded_file = st.file_uploader("Upload a PDF, TXT, or DOCX file", type=["pdf", "txt", "docx"])
 st.session_state.summary = ""
-print(st.session_state.summary)
-
+# Call appropriate fns listed above to process the uploaded file.
 if uploaded_file is not None:
-    # Save the uploaded file and get its file path
     file_path = save_uploaded_file(uploaded_file)
-
-    # Load the document based on its extension
     docs = load_data(file_path)
     st.write(f"Document loaded: {uploaded_file.name}")
     
     # Split the documents into chunks
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
     splits = text_splitter.split_documents(docs)
+    
 
-# # Replace 'your_huggingface_token' with your actual token
-    login('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')
-    # Initialize embeddings and vector store
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    # Configure Chroma to use a remote database (cloud-based)
+# Replace 'my_huggingface_token' with your token
+    login('my_huggingface_token')
+
+# Initialize embeddings and vector store
+# Configure Chroma to use a remote database (cloud-based)
 # Ensure a local directory to store the vector store data
+
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     chroma_db_dir = "chroma_db"  # Directory for local Chroma storage
     if not os.path.exists(chroma_db_dir):
         os.makedirs(chroma_db_dir)
@@ -191,9 +159,6 @@ if uploaded_file is not None:
         embedding=embeddings,
         persist_directory=chroma_db_dir  # Specify the directory for local storage
     )
-
-
-    # vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
 
     # Set up the retriever from the vector store
     retriever = vectorstore.as_retriever()
@@ -218,20 +183,18 @@ if uploaded_file is not None:
     
     prompt = PromptTemplate(template=new_prompt_template, input_variables=["context", "question", "sentiment"])
 
-    # Load your LLM model (assuming you have set this up)
-    # Example: using a placeholder LLM model from LangChain
-    # llm = HuggingFaceEmbeddings(model_name="llama3.2")  # Use your LLM setup here
+    # Load your LLM model that runs locally in ollama
     llm = OllamaLLM(model="llama3.2")
     llm_chain = LLMChain(prompt=prompt, llm=llm)
     
 
-# Retrieve the Context (from documents loaded earlier)
-    # summary="summarize from the context"
+# Retrieve the Context and summarize
+    
     summary = """Please provide a formal, concise, and structured summary from documents. Ensure that the summary is clear, accurate, without any unnecessary details. 
         The summary should focus on the main points, key arguments, and relevant information while maintaining clarity and formality. 
          Avoid subjective and emotive language' The summary should be objective and free of unnecessary details in 200 words. Avoid words like unfortunately, happy, apologize. 
      """
-
+# Manage session state and store summary
     if "Summary" not in st.session_state.summary:
 
         sentiment_result1 = analyze_sentiment(summary)
@@ -248,26 +211,10 @@ if uploaded_file is not None:
     st.write(f" {st.session_state.summary}")
 
 
-
-
-
-    # sentiment_result1 = analyze_sentiment(summary)
-    # context1 = "\n\n".join(doc.page_content for doc in retriever.get_relevant_documents(summary))
-
-
-    #             # Run the RAG Chain with the Question, Context, and Sentiment
-    # s_result = llm_chain.run({
-    #                 "context": context1,
-    #                 "question": summary,
-    #                 "sentiment": sentiment_result1
-    #             })
-    # st.write(f"Summary: {s_result}")
-
-
-
-    # Capture user input for the question
+# Capture user input for the question
     user_question = st.text_input("Please ask a question:")
-
+    
+# Security check
     if ("password" in user_question.lower() or 
         "phone number" in user_question.lower() or 
         "ssn" in user_question.lower()):
@@ -282,9 +229,8 @@ if uploaded_file is not None:
             # Perform Sentiment Analysis on the Question
             sentiment_result = analyze_sentiment(user_question)
             
-            # Retrieve the Context (from documents loaded earlier)
+            # Retrieve the Context 
             context = "\n\n".join(doc.page_content for doc in retriever.get_relevant_documents(user_question))
-
 
             # Run the RAG Chain with the Question, Context, and Sentiment
             result = llm_chain.run({
